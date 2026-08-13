@@ -5,14 +5,12 @@ except ImportError:
     import fitz
 from docx import Document
 
-from celery import shared_task
 
 
 EMAIL_PATTERN = re.compile(
     r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}\b"
 )
 
-@shared_task
 def extract_text_from_pdf(file):
     text = ""
     file_bytes = file.read()
@@ -21,7 +19,6 @@ def extract_text_from_pdf(file):
             text += page.get_text()
     return text
 
-@shared_task
 def extract_text_from_docx(file):
     if hasattr(file, 'path') and file.path:
         document = Document(file.path)
@@ -42,7 +39,6 @@ def extract_text_from_docx(file):
 
     return "\n".join(text)
 
-@shared_task
 def find_email_from_resume(file):
     if not file:
         return []

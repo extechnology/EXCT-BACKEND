@@ -35,7 +35,7 @@ class ConnectUSView(APIView):
             contact = instance.contact
             reference_path = instance.reference.path if instance.reference else None
             
-            contact_us_notification_mail.delay(
+            contact_us_notification_mail(
                 instance.name,
                 instance.contact,
                 instance.idea,
@@ -43,7 +43,7 @@ class ConnectUSView(APIView):
                 reference_path
             )
             if '@' in str(contact):
-                contact_replay_mail.delay(
+                contact_replay_mail(
                     instance.name,
                     instance.contact,
                     instance.idea,
@@ -64,7 +64,7 @@ class CarrerEnquiryView(APIView):
             resume = instance.resume
             resume_path = instance.resume.path if instance.resume else None
 
-            get_career_enquiry_mail.delay(
+            get_career_enquiry_mail(
                 instance.name,
                 instance.contact,
                 instance.job_profile,
@@ -77,7 +77,7 @@ class CarrerEnquiryView(APIView):
             to_email = emails[0] if emails else (contact if '@' in str(contact) else None)
 
             if to_email:
-                career_replay_mail.delay(
+                career_replay_mail(
                     instance.name,
                     to_email,
                     instance.job_profile,
