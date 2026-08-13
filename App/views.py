@@ -33,20 +33,22 @@ class ConnectUSView(APIView):
         if serializer.is_valid():
             instance = serializer.save()
             contact = instance.contact
-            contact_us_notification_mail(
+            reference_path = instance.reference.path if instance.reference else None
+            
+            contact_us_notification_mail.delay(
                 instance.name,
                 instance.contact,
                 instance.idea,
                 instance.subject,
-                instance.reference
+                reference_path
             )
             if '@' in str(contact):
-                contact_replay_mail(
+                contact_replay_mail.delay(
                     instance.name,
                     instance.contact,
                     instance.idea,
                     instance.subject,
-                    instance.reference
+                    reference_path
                 )
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
@@ -60,27 +62,28 @@ class CarrerEnquiryView(APIView):
             instance = serializer.save()
             contact = instance.contact
             resume = instance.resume
+            resume_path = instance.resume.path if instance.resume else None
 
-            get_career_enquiry_mail(
+            get_career_enquiry_mail.delay(
                 instance.name,
                 instance.contact,
                 instance.job_profile,
                 instance.education,
                 instance.skills,
-                instance.resume
+                resume_path
             )
             
             emails = find_email_from_resume(resume) if resume else []
             to_email = emails[0] if emails else (contact if '@' in str(contact) else None)
 
             if to_email:
-                career_replay_mail(
+                career_replay_mail.delay(
                     instance.name,
                     to_email,
                     instance.job_profile,
                     instance.education,
                     instance.skills,
-                    instance.resume
+                    resume_path
                 )
             
             return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -94,5 +97,5 @@ class BannerVideoAPIView(APIView):
         if not videos:
             return Response({"message": "No video found"}, status=status.HTTP_404_NOT_FOUND)
         video = videos[0]
-        serializer = BannerVideoSerizlizer(video)
+        serializer = BannerVideoSerizlizer(video, context={'request': request})
         return Response(serializer.data)
