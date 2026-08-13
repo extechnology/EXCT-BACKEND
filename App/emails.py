@@ -1,10 +1,9 @@
 from django.core.mail import EmailMultiAlternatives
 from django.conf import settings
-from celery import shared_task
 import os
 
 
-@shared_task
+
 def attach_reference_file(msg, reference):
     if not reference:
         return
@@ -31,7 +30,7 @@ def attach_reference_file(msg, reference):
         print(f"Error attaching reference file: {e}")
 
 
-@shared_task
+
 def contact_us_notification_mail(name, contact, idea, subject, reference):
     email_subject = f"New Contact Us Submission: {subject}"
     to_email = settings.EMAIL_HOST_USER
@@ -134,7 +133,7 @@ def contact_us_notification_mail(name, contact, idea, subject, reference):
     attach_reference_file(msg, reference)
     msg.send()
     
-@shared_task
+
 def contact_replay_mail(name, contact, idea, subject, reference):
     email_subject = f"Thank you for contacting us: {subject}"
     to_email = contact
@@ -189,7 +188,7 @@ def contact_replay_mail(name, contact, idea, subject, reference):
     attach_reference_file(msg, reference)
     msg.send()
 
-@shared_task
+
 def get_career_enquiry_mail(name, contact, job_profile, education, skills, resume):
     email_subject = f"New Career Enquiry: {job_profile} - {name}"
     to_email = settings.EMAIL_HOST_USER
@@ -508,7 +507,7 @@ def get_career_enquiry_mail(name, contact, job_profile, education, skills, resum
     attach_reference_file(msg, resume)
     msg.send()
 
-@shared_task
+
 def career_replay_mail(name, contact, job_profile, education, skills, resume):
     email_subject = f"Thank you for applying: {job_profile}"
     to_email = contact
