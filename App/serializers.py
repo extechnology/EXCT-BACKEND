@@ -2,7 +2,8 @@ from rest_framework import serializers
 from .models import (
     ConnectUS,
     CarrerEnquiry,
-    BannerVideo
+    BannerVideo,
+    ExShop
 )
 
 
@@ -20,3 +21,8 @@ class BannerVideoSerizlizer(serializers.ModelSerializer):
     class Meta:
         model = BannerVideo
         fields = ['video']
+
+class ExShopSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ExShop
+        fields = '__all__'
