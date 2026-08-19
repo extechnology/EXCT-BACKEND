@@ -6,13 +6,15 @@ from rest_framework.permissions import AllowAny
 from .models import (
     ConnectUS,
     CarrerEnquiry,
-    BannerVideo
+    BannerVideo,
+    ExShop
 )
 
 from .serializers import (
     ConnectUSSerializer,
     CarrerEnquirySerializer,
-    BannerVideoSerizlizer
+    BannerVideoSerizlizer,
+    ExShopSerializer
 )
 
 from .emails import (
@@ -99,3 +101,63 @@ class BannerVideoAPIView(APIView):
         video = videos[0]
         serializer = BannerVideoSerizlizer(video, context={'request': request})
         return Response(serializer.data)
+
+
+class ExShopView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        shops = ExShop.objects.all().order_by('-id')
+        serializer = ExShopSerializer(shops, many=True, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def post(self, request):
+        serializer = ExShopSerializer(data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ExShopDetailView(APIView):
+    permission_classes = [AllowAny]
+
+    def get_object(self, pk):
+        try:
+            return ExShop.objects.get(pk=pk)
+        except ExShop.DoesNotExist:
+            return None
+
+    def get(self, request, pk):
+        shop = self.get_object(pk)
+        if not shop:
+            return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ExShopSerializer(shop, context={'request': request})
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def put(self, request, pk):
+        shop = self.get_object(pk)
+        if not shop:
+            return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ExShopSerializer(shop, data=request.data, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, pk):
+        shop = self.get_object(pk)
+        if not shop:
+            return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+        serializer = ExShopSerializer(shop, data=request.data, partial=True, context={'request': request})
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, pk):
+        shop = self.get_object(pk)
+        if not shop:
+            return Response({"error": "Item not found"}, status=status.HTTP_404_NOT_FOUND)
+        shop.delete()
+        return Response({"message": "Item deleted successfully"}, status=status.HTTP_204_NO_CONTENT)
